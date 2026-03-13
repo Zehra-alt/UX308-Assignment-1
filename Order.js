@@ -3,7 +3,7 @@ let currentState = welcoming;
 const menu = {
   fries:{
     sizes: ["small", "medium", "large"],
-    toppings: ["truffle parm", "poutine", "regular"]
+    toppings: ["truffle parm", "poutine", "sea salt"]
   },
   burger: {
     sizes: ["single", "double"],
