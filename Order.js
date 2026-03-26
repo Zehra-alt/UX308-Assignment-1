@@ -1,17 +1,17 @@
 let currentState = welcoming;
 
 const menu = {
-  fries:{
+  coffee:{
     sizes: ["small", "medium", "large"],
-    toppings: ["truffle parm", "poutine", "sea salt"]
+    types: ["latte", "cappuccino", "americano"],
+    temperatures:["iced", "hot"]
   },
-  burger: {
-    sizes: ["single", "double"],
-    toppings: ["lettuce", "tomato", "bacon"]
+  tea: {
+    sizes: ["small", "medium", "large"],
+    types: ["peppermint", "herbal", "green", "matcha", "vanilla matcha"],
+    temperatures:["iced", "hot"]
   }
 };
-
-const drinks = ["coke", "sprite", "water", "root beer"];
 
 let order = [];
 
@@ -28,8 +28,8 @@ function welcoming() {
   let aReturn = [];
   currentState = ordering;
 
-  aReturn.push("Welcome to The Bite!");
-  aReturn.push("What would you like? (fries or burger)");
+  aReturn.push("Welcome to The Velvet Roast!");
+  aReturn.push("What would you like? (coffee or tea)");
 
   return aReturn;
 }
@@ -39,17 +39,13 @@ function ordering(sInput) {
   const input = sInput.toLowerCase();
 
   if(menu[input]){
-
     currentState = choosingSize;
-
     order.push({item: input});
 
     aReturn.push(`You chose ${input}. What size? ${menu[input].sizes.join(", ")}`);
 
   } else {
-
-    aReturn.push("Sorry, we only have fries or burger.");
-
+    aReturn.push("Sorry, we only have coffee or tea.");
   }
 
   return aReturn;
@@ -61,61 +57,51 @@ function choosingSize(sInput){
   const lastItem = order[order.length-1];
 
   if(menu[lastItem.item].sizes.includes(size)){
-
     lastItem.size = size;
-    currentState = choosingTopping;
+    currentState = choosingType;
 
-    aReturn.push(`Great. Choose a topping: ${menu[lastItem.item].toppings.join(", ")}`);
+    aReturn.push(`Nice. What type? ${menu[lastItem.item].types.join(", ")}`);
 
   } else {
-
     aReturn.push("Invalid size. Try again.");
-
   }
 
   return aReturn;
 }
 
-function choosingTopping(sInput){
+function choosingType(sInput){
   let aReturn = [];
-  const topping = sInput.toLowerCase();
+  const type = sInput.toLowerCase();
   const lastItem = order[order.length-1];
 
-  if(menu[lastItem.item].toppings.includes(topping)){
+  if(menu[lastItem.item].types.includes(type)){
+    lastItem.type = type;
+    currentState = choosingTemperature;
 
-    lastItem.topping = topping;
-    currentState = upsell;
-
-    aReturn.push(`Added ${lastItem.size} ${lastItem.item} with ${topping}.`);
-    aReturn.push(`Would you like a drink? (${drinks.join(", ")})`);
+    aReturn.push(`Got it. Hot or iced? (${menu[lastItem.item].temperatures.join(", ")})`);
 
   } else {
-
-    aReturn.push("Invalid topping. Try again.");
-
+    aReturn.push("Invalid type. Try again.");
   }
 
   return aReturn;
 }
 
-function upsell(sInput){
+function choosingTemperature(sInput){
   let aReturn = [];
-  const drink = sInput.toLowerCase();
+  const temp = sInput.toLowerCase();
+  const lastItem = order[order.length-1];
 
-  if(drinks.includes(drink)){
+  if(menu[lastItem.item].temperatures.includes(temp)){
+    lastItem.temperature = temp;
+    currentState = summary;
 
-    order.push({drink: drink});
-    aReturn.push(`${drink} added to your order.`);
+    aReturn.push(`Perfect. Added ${temp} ${lastItem.size} ${lastItem.type} ${lastItem.item}.`);
+    aReturn.push(showOrder());
 
   } else {
-
-    aReturn.push("No drink added.");
-
+    aReturn.push("Invalid temperature. Try again.");
   }
-
-  currentState = summary;
-
-  aReturn.push(showOrder());
 
   return aReturn;
 }
@@ -128,19 +114,10 @@ function summary(){
 }
 
 function showOrder(){
-
   let text = "Your order:\n";
 
   for(let item of order){
-
-    if(item.item){
-      text += `${item.size} ${item.item} with ${item.topping}\n`;
-    }
-
-    if(item.drink){
-      text += `Drink: ${item.drink}\n`;
-    }
-
+    text += `${item.temperature} ${item.size} ${item.type} ${item.item}\n`;
   }
 
   return text;
