@@ -13,7 +13,7 @@ const menu = {
   }
 };
 
-const upsellItems = ["water", "scone"]; // ✅ added
+const upsellItems = ["water", "scone"];
 
 let order = [];
 
@@ -96,10 +96,10 @@ function choosingTemperature(sInput){
 
   if(menu[lastItem.item].temperatures.includes(temp)){
     lastItem.temperature = temp;
-    currentState = anotherItem; // ✅ changed
+    currentState = anotherItem;
 
     aReturn.push(`Perfect. Added ${temp} ${lastItem.size} ${lastItem.type} ${lastItem.item}.`);
-    aReturn.push("Would you like anything else? (yes or no)"); // ✅ added
+    aReturn.push("Would you like anything else? (yes or no)");
 
   } else {
     aReturn.push("Invalid temperature. Try again.");
@@ -108,27 +108,60 @@ function choosingTemperature(sInput){
   return aReturn;
 }
 
-// ✅ NEW (for multiple items)
+// ---------------- MULTIPLE ITEMS ----------------
+
 function anotherItem(sInput){
   let aReturn = [];
   const input = sInput.toLowerCase();
 
-  if(input === "yes"){
-    currentState = ordering;
-    aReturn.push("What would you like? (coffee or tea)");
+  if(input === "yes" || input === "y"){
+    currentState = orderingAny;
+    aReturn.push(`What would you like? (coffee, tea, ${upsellItems.join(", ")})`);
 
-  } else if(input === "no"){
-    currentState = upsell;
-    aReturn.push(`Would you like a side? (${upsellItems.join(", ")})`);
+  } 
+  else if(
+    input === "no" || 
+    input === "n" || 
+    input === "no thanks" || 
+    input === "nah" || 
+    input === "nope"
+  ){
+    aReturn.push(showOrder());
+    aReturn.push("Thank you for your order!");
+    currentState = welcoming;
 
-  } else {
+  } 
+  else {
     aReturn.push("Please type yes or no.");
   }
 
   return aReturn;
 }
 
-// ✅ NEW (upsell)
+function orderingAny(sInput) {
+  let aReturn = [];
+  const input = sInput.toLowerCase();
+
+  if (menu[input]) {
+    currentState = choosingSize;
+    order.push({ item: input });
+    aReturn.push(`You chose ${input}. What size? ${menu[input].sizes.join(", ")}`);
+
+  } else if (upsellItems.includes(input)) {
+    order.push({ extra: input });
+    aReturn.push(`${input} added to your order.`);
+    aReturn.push("Would you like anything else? (yes or no)");
+    currentState = anotherItem;
+
+  } else {
+    aReturn.push(`Sorry, we only have coffee, tea, ${upsellItems.join(", ")}.`);
+  }
+
+  return aReturn;
+}
+
+// ---------------- UPSELL ----------------
+
 function upsell(sInput){
   let aReturn = [];
   const input = sInput.toLowerCase();
@@ -136,22 +169,28 @@ function upsell(sInput){
   if(upsellItems.includes(input)){
     order.push({extra: input});
     aReturn.push(`${input} added to your order.`);
-  } else {
+  } 
+  else if(
+    input === "no" || 
+    input === "no thanks" || 
+    input === "nah" || 
+    input === "nope"
+  ){
+    aReturn.push("No extras added.");
+  } 
+  else {
     aReturn.push("No extras added.");
   }
 
-  currentState = summary;
   aReturn.push(showOrder());
-
-  return aReturn;
-}
-
-function summary(){
-  let aReturn = [];
   aReturn.push("Thank you for your order!");
+
   currentState = welcoming;
+
   return aReturn;
 }
+
+// ---------------- SHOW ORDER ----------------
 
 function showOrder(){
   let text = "Your order:\n";
@@ -160,7 +199,7 @@ function showOrder(){
     if(item.item){
       text += `${item.temperature} ${item.size} ${item.type} ${item.item}\n`;
     }
-    if(item.extra){ // ✅ added
+    if(item.extra){
       text += `Extra: ${item.extra}\n`;
     }
   }
